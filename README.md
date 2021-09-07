@@ -18,8 +18,8 @@
     src/library:
 
 ## Системные требования (Debian/Ubuntu):
-sudo apt install unoconv
-sudo apt install imagemagick
+1. sudo apt install unoconv
+2. sudo apt install imagemagick
 
 ## Тестовый стенд: 
     public
