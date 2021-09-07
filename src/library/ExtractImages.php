@@ -1,9 +1,11 @@
 <?php 
 namespace library;
 
+require_once __DIR__ . '/helpers/ImagickHelper.php';
 require_once __DIR__ . '/helpers/ErrorHelper.php';
 require_once __DIR__ . '/helpers/EnvHelper.php';
 
+use library\helpers\ImagickHelper as ImagickHelper;
 use library\helpers\ErrorHelper as ErrorHelper;
 use library\helpers\EnvHelper as EnvHelper;
 
@@ -33,11 +35,12 @@ class ExtractImages
     private static $command_to_pdf = 'unoconv';
     
     /**
+     * Deprecated!!!
      * Команда, используемая для извлечения изображений из pdf-файла.
      * 
      * @var string
      */
-    private static $command_from_pdf = 'pdfimages';
+    //private static $command_from_pdf = 'pdfimages';
 
 
     /**
@@ -52,7 +55,7 @@ class ExtractImages
     );
 
     /**
-     * MIME, допустимые для преобразования в PDF.
+     * MIME, доступные для преобразования в PDF.
      * 
      * @var array
      */
@@ -65,31 +68,58 @@ class ExtractImages
      * @param string $input_dir
      * @param string $output_dir
 	 */
-    public static function extractImagesFromFile(array $file, $input_dir, $output_dir) {
+    public static function extractImagesFromFile(array $file, $input_dir, $output_dir, $image_format = 'png') {
         try {
-            if( true === EnvHelper::checkFunctionEnabled(self::$func_name) ) {
+            if( true === EnvHelper::isFunctionEnabled(self::$func_name) ) {
 
                 $path_to_file_upload = self::sanitizePath($input_dir) . $file['name'];
                 $path_to_pdf = pathinfo($path_to_file_upload)['dirname'] . '/' .  pathinfo($path_to_file_upload)['filename'] . '.pdf';
                 
                 $convert_command = self::buildConvertToPdfCommand($path_to_file_upload);
-                $extract_command = self::buildExtractCommand($path_to_file_upload, $output_dir);
-
-                if( isset($convert_command) ) {
-                    $extract_command = self::buildExtractCommand($path_to_pdf, $output_dir);                   
+                
+                if( isset($convert_command) ) {                   
                     exec( $convert_command );
                 }
-
-                if( isset($extract_command) ) {  
-                    self::clearDirectory($output_dir);
-                    exec( $extract_command );
-                    self::getCatalogContent($output_dir);
-                } 
+ 
+                self::clearDirectory($output_dir);
+                self::convertPdfToImages($path_to_pdf, $output_dir, $image_format);
+                self::getCatalogContent($output_dir);
     
             }
         } catch (Exception $e) {
             echo 'Extract images exeption: ',  $e->getMessage(), "\n";
         }
+    }
+
+    /**
+	 * Получить изображения из PDF-файла с помощью Imagick
+	 *
+     * @param array $file
+     * @param string $output_dir
+     * @param string $image_format
+     * @return array
+	 */
+    public static function convertPdfToImages($pdf_file, $output_dir, $image_format = 'png') {
+        
+        ImagickHelper::isImagickLoaded();
+        ImagickHelper::isFileFormatEnabled( $image_format );
+
+        $result = array();
+        $imagick = new \Imagick();
+        $imagick->readImage($pdf_file);
+        
+        foreach ( $imagick as $key => $image ) {
+            
+            $now = date("d-m-Y_H-i-s");
+            $image->setImageFormat( $image_format );
+            $image_file = self::sanitizePath( $output_dir ) . ((int)$key+1) . '.' . $image_format;
+            
+            if( true === $image->writeImage($image_file) ) {
+                $result[] = $image_file;
+            }
+        }
+        
+        return $result;
     }
 
     /**
@@ -105,7 +135,7 @@ class ExtractImages
             $command = self::$command_to_pdf;
             
             if( in_array($file_ext, self::$converted_mime_types ) ) {
-                if( true === EnvHelper::checkCommandEnabled($command) ) {
+                if( true === EnvHelper::isCommandEnabled($command) ) {
                     return $command . " -f pdf '" . $path_to_file . "'";
                 }
             }  
@@ -118,20 +148,21 @@ class ExtractImages
     }
 
     /**
-	 * Создать команду извлечения изображений из PDF-файла.
+	 * Deprecated!
+     * Создать команду извлечения изображений из PDF-файла.
 	 *
      * @param string $path_to_file
      * @param string $output_dir
      * @return string
 	 */
-    private static function buildExtractCommand($path_to_file, $output_dir) {
+    /*private static function buildExtractCommand($path_to_file, $output_dir) {
         try {
             
             $file_ext = end(explode('.', $path_to_file));
             $command = self::$command_from_pdf;
             
             if( !in_array($file_ext, self::$converted_mime_types ) ) {
-                if( true === EnvHelper::checkCommandEnabled($command) ) {   
+                if( true === EnvHelper::isCommandEnabled($command) ) {   
                     return $command . " -j " . $path_to_file . " " . $output_dir . "image -png";
                 }
             }
@@ -141,7 +172,7 @@ class ExtractImages
         } catch (Exception $e) {
             echo 'Build extract command exeption: ',  $e->getMessage(), "\n";
         }
-    }
+    }*/
 
     /**
 	 * Сохранить файл в каталог $input_dir.
@@ -154,7 +185,7 @@ class ExtractImages
             
             ErrorHelper::getFileUploadError($uploaded_file['error']);
             
-            ErrorHelper::getMimeTypesErrors($uploaded_file['type'], self::$available_mime_types);
+            ErrorHelper::getMimeTypesErrors($uploaded_file, self::$available_mime_types);
             
             move_uploaded_file($uploaded_file['tmp_name'], $input_dir . $uploaded_file['name']);
 
@@ -201,16 +232,14 @@ class ExtractImages
      * 
      * @param string $output_dir
 	 */
-    private static function getCatalogContent($output_dir) {
+    public static function getCatalogContent($output_dir) {
 
-        $files = array_slice(scandir($output_dir, 0), 1);
+        $files = array_slice(scandir($output_dir, 0), 2);
+        usort($files, function($a, $b) {
+            return $a - $b;
+        });
 
-        echo nl2br("Список изображений в каталоге $output_dir: \r\n");
-                
-        for($i = 1; $i < count($files); $i++) {
-            echo nl2br("$i. $files[$i]\r\n");
-        }
-
+        return $files;
     }
 
     /**

@@ -10,6 +10,7 @@ namespace library\helpers;
  * @version     1.0
  * @since       30.08.2021
  */
+
 class EnvHelper
 {
 
@@ -19,7 +20,7 @@ class EnvHelper
      * @param string $func_name
 	 * @return boolean
 	 */
-    public static function checkFunctionEnabled( $func_name ) { 
+    public static function isFunctionEnabled( $func_name ) { 
         $is_function_enabled = false;
         
         try {
@@ -39,7 +40,7 @@ class EnvHelper
      * @param string $command
 	 * @return boolean
 	 */
-    public static function checkCommandEnabled( $command ) {
+    public static function isCommandEnabled( $command ) {
         $is_command_enabled = false;
         
         try {

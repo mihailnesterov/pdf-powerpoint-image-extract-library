@@ -2,6 +2,10 @@
 require_once __DIR__ . '/../src/library/ExtractImages.php';
 
 use library\ExtractImages as ExtractImages;
+
+// задаем пути к каталогам файла и выгрузки изображений
+$input_dir = realpath(__DIR__) . '/input/';
+$output_dir = realpath(__DIR__) . '/output/';
 ?>
 
 <!DOCTYPE html>
@@ -17,8 +21,10 @@ use library\ExtractImages as ExtractImages;
     <div class="wrapper">
         <div class="col">
             
-            <h1><a href="/prodamus-pdf-powerpoint-extract-library/">PDF/PowerPoint extract library</a></h1>
-            
+            <header>
+                <h1><a href="/prodamus-pdf-powerpoint-extract-library/">PDF/PowerPoint extract library</a></h1>
+            </header>
+
             <form id="form" action="" method="post" enctype="multipart/form-data">
                 <fieldset>
                     <input type="hidden" name="MAX_FILE_SIZE" value="20000000" />
@@ -32,9 +38,7 @@ use library\ExtractImages as ExtractImages;
 
                 if( isset( $_POST['btn-extract'] ) ) { 
                     
-                    // задаем пути к каталогам файла и выгрузки изображений
-                    $input_dir = realpath(__DIR__) . '/input/';
-                    $output_dir = realpath(__DIR__) . '/output/';
+                    
 
                     // получаем файл из $_FILES
                     $file = array_values($_FILES)[0];
@@ -42,8 +46,8 @@ use library\ExtractImages as ExtractImages;
                     // сохраняем файл
                     ExtractImages::saveFile($file, $input_dir );
                     
-                    // разбираем файл на картинки
-                    ExtractImages::extractImagesFromFile($file, $input_dir, $output_dir );
+                    // разбираем файл на картинки в указанном в последнем аргументе формате
+                    ExtractImages::extractImagesFromFile($file, $input_dir, $output_dir, 'png' );
 
                 } else {
                     echo "<p>Выберите файл и нажмите 'Запустить обработку'</p>";
@@ -52,8 +56,37 @@ use library\ExtractImages as ExtractImages;
             ?>
             </div>
         </div>
-        
-    </div>
+        <?php 
+            $slides = ExtractImages::getCatalogContent($output_dir);
 
+            if(!empty($slides)): ?>
+            
+            <div class="row">
+                <div class="slide-list">
+                    <h4>Загружено слайдов: <?= count($slides) ?></h4>
+                    <?php foreach($slides as $key => $slide): ?>
+                        
+                        <figure>
+                            <img id="<?= $slide ?>" src="<?= $_SERVER['REQUEST_URI'] . 'output/' . $slide ?>" alt="<?= explode('.', $slide)[0] ?>" />
+                            <figcaption>Слайд: <?= explode('.', $slide)[0] ?></figcaption>
+                        </figure>
+                            
+                    <?php endforeach; ?>
+                </div>
+                <div class="slide-view">
+                    <figure>
+                        <img id="slide-view" src="" alt="" />
+                        <figcaption><b>Слайд не выбран</b></figcaption>
+                    </figure>
+                </div>
+            </div>
+
+            <?php 
+            endif;
+        ?>
+        
+
+    </div>
+    <script src="js/scripts.js"></script>
 </body>
 </html>

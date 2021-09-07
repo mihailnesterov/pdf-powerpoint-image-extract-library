@@ -1,12 +1,22 @@
+body {
+    background-color: #fff;
+}
+
 .wrapper {
     display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: flex-start;
     gap: 1em;
+    width: 100%;
 }
 
 .wrapper > * {
-    flex-basis: 100%;
+    flex: 1 1 100%;
     border: 1px #ccc solid;
     padding: 1em;
+    width: 100%;
+    box-sizing: border-box;
 }
 
 .message-box {
@@ -15,4 +25,83 @@
     margin-top: 1em;
     max-height: 500px;
     overflow-y: auto;
+}
+
+.row {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1em;
+    border: 1px #ccc solid;
+    width: 100%;
+}
+
+.row > * {
+    border: 1px #ccc solid;
+    padding: 1em;
+}
+
+.row > *:nth-child(1) {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    flex-wrap: nowrap;
+    align-items: flex-start;
+    justify-content: space-between;
+    border: 1px #f0f0f0 solid;
+    max-height: 500px;
+    overflow-y: auto;
+    background-color: #f0f0f0;
+}
+
+.row > *:nth-child(1) h4 {
+    width: 100%;
+    margin: 0;
+    padding-bottom: 1em;
+    text-align: center;
+    border-bottom: 1px #ccc solid;
+}
+
+.row > *:nth-child(1) > figure {
+    cursor: pointer;
+    border: 1px #f0f0f0 solid;
+    padding: 1em;
+}
+
+.row > *:nth-child(1) > figure:hover {
+    border: 1px #ccc solid;
+    border-radius: 3px;
+    box-shadow: 0px 2px 4px rgba(0,0,0,0.2);
+}
+
+.row > *:nth-child(1) > figure img {
+    width: 100%;
+    text-align: center;
+}
+
+.row > *:nth-child(1) > figure figcaption {
+    font-size: 1em;
+    font-weight: 700;
+    text-align: center;
+}
+
+.row > *:nth-child(2) {
+    flex: 4;
+}
+
+.row > *:nth-child(2) > figure {
+    text-align: center;
+}
+
+.row > *:nth-child(2) > figure img {
+    width: 600px;
+    text-align: center;
+}
+
+.row > *:nth-child(2) > figure figcaption {
+    font-size: 1em;
+    font-weight: 700;
+    text-align: center;
 }
