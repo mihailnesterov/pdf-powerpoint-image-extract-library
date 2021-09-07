@@ -260,6 +260,7 @@ class ExtractImages
     /**
 	 * Получить расширение файла по типу MIME.
      * 
+     * @param string $mime_type
      * @return array
 	 */
     private static function getExtansionByMIMEType( $mime_type ) {
@@ -278,6 +279,7 @@ class ExtractImages
     /**
 	 * Получить тип MIME по расширению файла.
      * 
+     * @param string $file_ext
      * @return array
 	 */
     private static function getMimeTypeByExtansion( $file_ext ) {
