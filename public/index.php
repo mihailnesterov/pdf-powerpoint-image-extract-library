@@ -37,8 +37,6 @@ $output_dir = realpath(__DIR__) . '/output/';
             <?php
 
                 if( isset( $_POST['btn-extract'] ) ) { 
-                    
-                    
 
                     // получаем файл из $_FILES
                     $file = array_values($_FILES)[0];
@@ -48,7 +46,6 @@ $output_dir = realpath(__DIR__) . '/output/';
                     
                     // разбираем файл на картинки в указанном в последнем аргументе формате
                     ExtractImages::extractImagesFromFile($file, $input_dir, $output_dir, 'png' );
-
                 } else {
                     echo "<p>Выберите файл и нажмите 'Запустить обработку'</p>";
                 }

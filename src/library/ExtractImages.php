@@ -231,6 +231,7 @@ class ExtractImages
 	 * Вывести содержимое каталога.
      * 
      * @param string $output_dir
+     * @return array
 	 */
     public static function getCatalogContent($output_dir) {
 
