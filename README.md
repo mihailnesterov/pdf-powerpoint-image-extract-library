@@ -18,8 +18,8 @@
     src/library:
 
 ## Системные требования (Debian/Ubuntu):
-1. sudo apt install poppler-utils
-2. sudo apt install unoconv
+sudo apt install unoconv
+sudo apt install imagemagick
 
 ## Тестовый стенд: 
     public
